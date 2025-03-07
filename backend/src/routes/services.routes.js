@@ -1,15 +1,17 @@
-import { Router } from "express";
-import { createService, getServices, deleteService, getFilteredServices} from "../controllers/services.controller.js";
+import express from "express";
+import { createService, getServices, deleteService, getFilteredServices } from "../controllers/services.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 import { authorizeAdmin } from "../middleware/role.middleware.js";
 
+const router = express.Router();
 
-const router = Router();
+// 📌 RESTful: Obtener todos los servicios con filtros y paginación
+router.route("/").get(getFilteredServices); 
 
-router.get("/", getServices); // 🔹 Cualquier usuario puede ver los servicios
-router.post("/", authenticate, authorizeAdmin, createService); // 🔹 Solo admin o Super Admin pueden crear
-router.delete("/:id", authenticate, authorizeAdmin, deleteService);// 🔹 Solo admin o Super Admin pueden eliminar
-router.get("/", getFilteredServices); // Obtener servicios con filtros y paginación
+// 📌 RESTful: Crear un servicio (solo admin o super admin)
+router.route("/").post(authenticate, authorizeAdmin, createService);
 
+// 📌 RESTful: Eliminar un servicio (solo admin o super admin)
+router.route("/:id").delete(authenticate, authorizeAdmin, deleteService);
 
 export default router;

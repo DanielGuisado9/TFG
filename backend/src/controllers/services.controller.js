@@ -1,5 +1,6 @@
 import Service from "../models/service.js";
 import mongoose from "mongoose"; // Para validar IDs
+import logger from "../utils/logger.js";
 
 export const createService = async (req, res) => {
     try {
@@ -30,6 +31,7 @@ export const getServices = async (req, res) => {
         limit = parseInt(limit);
 
         if (page < 1 || limit < 1) {
+            logger.warn("⚠️ Petición con valores de paginación inválidos");
             return res.status(400).json({ message: "Los valores de página y límite deben ser mayores a 0" });
         }
 
@@ -43,6 +45,8 @@ export const getServices = async (req, res) => {
             .skip(skip)
             .limit(limit);
 
+        logger.info(`✅ Servicios obtenidos - Página: ${page}, Límite: ${limit}, Total: ${total}`);
+
         res.status(200).json({
             total,
             page,
@@ -51,10 +55,11 @@ export const getServices = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error al obtener servicios:", error);
+        logger.error(`❌ Error al obtener servicios: ${error.message}`);
         res.status(500).json({ message: "Error interno del servidor", error });
     }
 };
+
 export const getFilteredServices = async (req, res) => {
     try {
         let { name, minPrice, maxPrice, minDuration, maxDuration, page = 1, limit = 10 } = req.query;

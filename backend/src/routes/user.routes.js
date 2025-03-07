@@ -5,7 +5,10 @@ import { authorizeAdmin } from "../middleware/role.middleware.js";
 
 const router = express.Router();
 
-router.get("/profile", authenticate, getProfile);
-router.post("/admin", authenticate, authorizeAdmin, createAdmin);
+// 📌 RESTful: Obtener perfil del usuario autenticado (GET /api/users/me)
+router.route("/me").get(authenticate, getProfile);
+
+// 📌 RESTful: Crear un nuevo administrador (POST /api/users/admin)
+router.route("/admin").post(authenticate, authorizeAdmin, createAdmin);
 
 export default router;

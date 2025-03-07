@@ -5,10 +5,15 @@ import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/admin", authenticate, createAdmin); // Solo el Super Admin puede hacer esto
-router.post("/register", register);
-router.post("/login", login);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password", resetPassword);
+// 📌 RESTful: Registro y autenticación
+router.route("/register").post(register); // Registrar usuario
+router.route("/login").post(login); // Iniciar sesión
+
+// 📌 RESTful: Recuperación de contraseña
+router.route("/forgot-password").post(forgotPassword); // Solicitar recuperación de contraseña
+router.route("/reset-password").post(resetPassword); // Resetear contraseña
+
+// 📌 RESTful: Creación de administradores (solo Super Admin)
+router.route("/admin").post(authenticate, createAdmin); 
 
 export default router;

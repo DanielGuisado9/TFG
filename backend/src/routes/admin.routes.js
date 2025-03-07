@@ -5,6 +5,7 @@ import { authorizeRole } from "../middleware/role.middleware.js";
 
 const router = express.Router();
 
-router.get("/dashboard", authenticate, authorizeRole("admin"), someAdminFunction);
+// 📌 RESTful: Obtener información del panel de administración (GET /api/admin/dashboard)
+router.route("/dashboard").get(authenticate, authorizeRole("admin"), someAdminFunction);
 
 export default router;
