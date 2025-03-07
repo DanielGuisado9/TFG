@@ -1,6 +1,6 @@
 import Service from "../models/service.js";
 
-// Obtener todos los servicios
+// Obtener todos los servicios (disponible para todos)
 export const getServices = async (req, res) => {
     try {
         const services = await Service.find();
@@ -16,6 +16,11 @@ export const createService = async (req, res) => {
 
     try {
         const { name, price, duration } = req.body;
+
+        // Verificar si el servicio ya existe
+        const existingService = await Service.findOne({ name });
+        if (existingService) return res.status(400).json({ message: "Este servicio ya existe" });
+
         const newService = new Service({ name, price, duration });
         await newService.save();
 
@@ -36,7 +41,7 @@ export const updateService = async (req, res) => {
         const updatedService = await Service.findByIdAndUpdate(
             id,
             { name, price, duration },
-            { new: true }
+            { new: true, runValidators: true }
         );
 
         if (!updatedService) return res.status(404).json({ message: "Servicio no encontrado" });

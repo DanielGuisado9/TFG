@@ -1,7 +1,7 @@
 import authRoutes from "../routes/auth.routes.js";
 import userRoutes from "../routes/user.routes.js";
 import citasRoutes from "../routes/citas.routes.js";
-import serviceRoutes from "../routes/service.routes.js";
+import serviceRoutes from "../routes/services.routes.js";
 
 export default (app) => {
     app.use("/api/auth", authRoutes);
