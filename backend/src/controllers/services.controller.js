@@ -1,4 +1,5 @@
 import Service from "../models/service.js";
+import mongoose from "mongoose"; // Para validar IDs
 
 export const createService = async (req, res) => {
     try {
@@ -24,54 +25,112 @@ export const createService = async (req, res) => {
 // Obtener todos los servicios (disponible para todos)
 export const getServices = async (req, res) => {
     try {
-        const services = await Service.find();
-        res.status(200).json(services);
+        let { page = 1, limit = 10 } = req.query;
+        page = parseInt(page);
+        limit = parseInt(limit);
+
+        if (page < 1 || limit < 1) {
+            return res.status(400).json({ message: "Los valores de página y límite deben ser mayores a 0" });
+        }
+
+        const skip = (page - 1) * limit;
+
+        // Obtener total de documentos
+        const total = await Service.countDocuments();
+        
+        // Obtener servicios con paginación
+        const services = await Service.find()
+            .skip(skip)
+            .limit(limit);
+
+        res.status(200).json({
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: services
+        });
+
     } catch (error) {
-        res.status(500).json({ message: "Error al obtener los servicios", error });
+        console.error("Error al obtener servicios:", error);
+        res.status(500).json({ message: "Error interno del servidor", error });
     }
 };
-// Actualizar un servicio (solo admins)
-export const updateService = async (req, res) => {
+export const getFilteredServices = async (req, res) => {
     try {
-        if (!req.user || req.user.role !== "admin") {
-            return res.status(403).json({ message: "Acceso denegado, solo administradores pueden actualizar servicios" });
+        let { name, minPrice, maxPrice, minDuration, maxDuration, page = 1, limit = 10 } = req.query;
+        page = parseInt(page);
+        limit = parseInt(limit);
+        const skip = (page - 1) * limit;
+
+        let filter = {};
+
+        if (name) {
+            filter.name = { $regex: name, $options: "i" }; // Búsqueda insensible a mayúsculas
         }
 
-        const { id } = req.params;
-        const { name, price, duration } = req.body;
-
-        const updatedService = await Service.findByIdAndUpdate(
-            id,
-            { name, price, duration },
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedService) {
-            return res.status(404).json({ message: "Servicio no encontrado" });
+        if (minPrice || maxPrice) {
+            filter.price = {};
+            if (minPrice) filter.price.$gte = parseFloat(minPrice);
+            if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
         }
 
-        res.status(200).json({ message: "Servicio actualizado exitosamente", service: updatedService });
+        if (minDuration || maxDuration) {
+            filter.duration = {};
+            if (minDuration) filter.duration.$gte = parseFloat(minDuration);
+            if (maxDuration) filter.duration.$lte = parseFloat(maxDuration);
+        }
+
+        const total = await Service.countDocuments(filter);
+        const services = await Service.find(filter).skip(skip).limit(limit);
+
+        res.status(200).json({
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: services
+        });
+
     } catch (error) {
-        res.status(500).json({ message: "Error al actualizar el servicio", error });
+        console.error("Error al filtrar servicios:", error);
+        res.status(500).json({ message: "Error interno del servidor", error });
     }
 };
+
 
 // Eliminar un servicio (solo admins)
 export const deleteService = async (req, res) => {
     try {
-        if (!req.user || req.user.role !== "admin") {
+        if (!req.user) {
+            return res.status(401).json({ message: "No autorizado, token inválido" });
+        }
+
+        if (req.user.role !== "admin") {
             return res.status(403).json({ message: "Acceso denegado, solo administradores pueden eliminar servicios" });
         }
 
         const { id } = req.params;
-        const deletedService = await Service.findByIdAndDelete(id);
+        console.log("🗑️ Intentando eliminar servicio con ID:", id);
 
-        if (!deletedService) {
+        // Validar si el ID es un ObjectId válido
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "ID de servicio no válido" });
+        }
+
+        // Buscar el servicio antes de eliminarlo
+        const service = await Service.findById(id);
+        if (!service) {
+            console.log("❌ Servicio no encontrado en la BD.");
             return res.status(404).json({ message: "Servicio no encontrado" });
         }
 
+        // Eliminar el servicio
+        await Service.findByIdAndDelete(id);
+
+        console.log("✅ Servicio eliminado correctamente:", id);
         res.status(200).json({ message: "Servicio eliminado exitosamente" });
+
     } catch (error) {
-        res.status(500).json({ message: "Error al eliminar el servicio", error });
+        console.error("❌ Error en deleteService:", error.message);
+        res.status(500).json({ message: "Error al eliminar el servicio", error: error.message });
     }
 };
