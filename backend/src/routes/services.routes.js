@@ -1,20 +1,11 @@
-import express from "express";
-import { getServices, createService, updateService, deleteService } from "../controllers/services.controller.js";
+import { Router } from "express";
+import { createService, getServices} from "../controllers/services.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 import { authorizeAdmin } from "../middleware/role.middleware.js";
 
-const router = express.Router();
+const router = Router();
 
-// Obtener todos los servicios (accesible para todos)
-router.get("/", getServices);
-
-// Crear un nuevo servicio (solo admins)
-router.post("/", authenticate, authorizeAdmin, createService);
-
-// Actualizar un servicio (solo admins)
-router.put("/:id", authenticate, authorizeAdmin, updateService);
-
-// Eliminar un servicio (solo admins)
-router.delete("/:id", authenticate, authorizeAdmin, deleteService);
+router.get("/", getServices); // 🔹 Cualquier usuario puede ver los servicios
+router.post("/", authenticate, authorizeAdmin, createService); // 🔹 Solo admin o Super Admin pueden crear
 
 export default router;

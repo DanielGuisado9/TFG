@@ -1,34 +1,31 @@
 import jwt from "jsonwebtoken";
+import User from "../models/User.js"; // Importa el modelo de usuario
 import dotenv from "dotenv";
-import User from "../models/User.js"; // 👈 ¡Asegúrate de que sea el modelo correcto!
 
 dotenv.config();
 
-// 🔹 Middleware para autenticar al usuario
 export const authenticate = async (req, res, next) => {
+    const token = req.header("Authorization")?.split(" ")[1];
+
+    if (!token) {
+        return res.status(401).json({ message: "Acceso denegado, no se proporcionó token" });
+    }
+
     try {
-        const token = req.header("Authorization")?.split(" ")[1];
-
-        if (!token) {
-            console.log("❌ No se proporcionó token");
-            return res.status(401).json({ message: "Acceso denegado, no se proporcionó token" });
-        }
-
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log("✅ Token decodificado:", decoded);
 
-        const user = await User.findById(decoded.userId).select("name email role"); 
-
+        // Buscamos al usuario en la base de datos para confirmar su rol
+        const user = await User.findById(decoded.userId);
+        
         if (!user) {
-            console.log("❌ Usuario no encontrado en la BD");
-            return res.status(401).json({ message: "Usuario no encontrado" });
+            return res.status(404).json({ message: "Usuario no encontrado" });
         }
 
-        req.user = user; // 👈 Guardamos el usuario en `req.user` para usarlo en otros middlewares
-        console.log("✅ Usuario autenticado:", req.user);
+        req.user = user; // Guardamos el usuario autenticado
+
+        console.log("✅ Usuario autenticado correctamente:", req.user); // DEBUG
         next();
     } catch (error) {
-        console.error("❌ Error en authenticate:", error.message);
         return res.status(403).json({ message: "Token inválido o expirado" });
     }
 };
