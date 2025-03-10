@@ -1,7 +1,7 @@
 import request from "supertest";
-import { app, server } from '../server.js'; 
+import { app, server } from '../../server.js'; 
 import mongoose from "mongoose";
-import Service from '../src/models/service.js'; 
+import Service from '../../src/models/service.js'; 
 
 describe("Servicios API", () => {
     let adminToken;

@@ -1,5 +1,5 @@
 import request from "supertest";
-import { app, server } from '../server.js';
+import { app, server } from '../../server.js';
 
 describe("Auth Controller", () => {
     let userToken;

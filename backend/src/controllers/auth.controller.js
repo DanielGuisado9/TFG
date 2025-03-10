@@ -29,6 +29,26 @@ export const authenticate = async (req, res, next) => {
     }
 };
 
+// ✅ Creación de usuario
+export const createUser = async (req, res) => {
+    const { name, email, password, role } = req.body;
+
+    try {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) return res.status(400).json({ message: "El correo ya está registrado" });
+
+        const hashedPassword = bcrypt.hashSync(password, 10);
+
+        const newUser = new User({ name, email, password: hashedPassword, role });
+        await newUser.save();
+
+        res.status(201).json({ message: "Usuario creado exitosamente", user: newUser });
+    } catch (error) {
+        console.error("❌ Error al crear usuario:", error);
+        res.status(500).json({ message: "Error al crear usuario", error });
+    }
+};
+
 // ✅ Registro de usuario (incluye SUPER ADMIN)
 export const register = async (req, res) => {
     const { name, email, password } = req.body;
