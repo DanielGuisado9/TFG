@@ -1,11 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import { connectDB } from './config/database.js';
-import userRoutes from './routes/user.routes.js';
-import authRoutes from './routes/auth.routes.js';
-import citasRoutes from './routes/citas.routes.js';
-import servicesRoutes from './routes/services.routes.js';
+import { connectDB } from './src/config/database.js';
+import userRoutes from './src/routes/user.routes.js';
+import authRoutes from './src/routes/auth.routes.js';
+import citasRoutes from './src/routes/citas.routes.js';
+import servicesRoutes from './src/routes/services.routes.js';
 
 // Asegurar que la base de datos se conecte antes de iniciar el servidor
 try {
@@ -34,4 +34,4 @@ const server = app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
 
-export { app, server };
+export { app, server }; // 🔥 Exportamos `server` para cerrarlo en los tests

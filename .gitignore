@@ -1,1 +1,32 @@
+# Node.js dependencies
 node_modules/
+package-lock.json
+
+# Logs
+logs/
+*.log
+
+# Archivos de entorno
+.env
+
+# Directorios de salida de compiladores (TypeScript, Webpack, Babel)
+dist/
+build/
+
+# Mapas de fuente y archivos de declaración TypeScript
+*.js.map
+*.d.ts
+
+# Cobertura de tests
+coverage/
+
+# SonarQube
+.scannerwork/
+
+# Configuración de editores (VSCode, JetBrains, etc.)
+.vscode/
+.idea/
+
+# Docker
+.dockerignore
+Dockerfile
